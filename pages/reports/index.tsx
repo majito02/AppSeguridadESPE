@@ -360,7 +360,7 @@ const ReportsPage = () => {
                 },
               }
             },
-            colors: [  '#FF5733', '#3366CC', '#66CC66', '#FFC300', '#FF9933',
+            colors: [  '#CC9900', '#3366CC', '#66CC66', '#FFC300', '#FF9933',
             '#9966CC', '#FF3399', '#00CC99', '#FF6600', '#0099CC',
             '#FF9966', '#003366', '#CC9900', '#FF3300', '#339933',
             '#FF6600', '#006699', '#FF0033', '#00CCFF', '#FFCC33'
@@ -392,12 +392,12 @@ const ReportsPage = () => {
               }
             },
             title: {
-                text: 'Custom DataLabels',
+                text: 'Reportes de Barras de Emergencias',
                 align: 'center',
                 floating: true
             },
             subtitle: {
-                text: 'Category Names as DataLabels inside bars',
+                text: 'Cantidad de Eemergencias',
                 align: 'center',
             },
             tooltip: {
