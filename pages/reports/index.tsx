@@ -148,7 +148,26 @@ const ReportsPage = () => {
   const [dataBarrasNumber, setDataBarrasNumber] = useState([]);
   const [primeraVez, setPrimeraVez] = useState(true);
 
-  const [dataPastel, setDataPastel] = useState([25, 15, 44, 55, 41, 17]);
+  const [dataPastel, setDataPastel] = useState([{data:[25, 15, 44, 55, 41, 17]}]);
+  const [heatmapOptionsPie, setHeatmapOptionsPie] = useState<ApexOptions>( {
+    chart: {
+      type: 'bar',
+      height: 350
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4
+      }
+    },
+    dataLabels: {
+      enabled: false
+    },
+    xaxis: {
+      categories: ["25", "15", "44", "55", "41", "17"] ,
+    },colors:
+      [  '#FF5733', '#3366CC', '#66CC66']
+    
+  })
   const [labelsBarras, setLabelsBarras] = useState([]);
   const ReporteCard = ({ titulo, descripcion, valor }: any) => {
     return (
@@ -268,18 +287,13 @@ const ReportsPage = () => {
     axios.post('http://localhost:3000/api/reportes/obtenerReporteBarras', { ciudad, barrio, titulo,fechaInicio, fechaFin, horaInicio, horaFin })
       .then(response => {setDataBarrasNumber(response.data.data);
         console.log(response.data.data);
-        
         const values: any = Object.keys(response.data.data);
         const conteos: any = Object.values(response.data.data);
-        const labels: any = values.map((value: any) => {
-          const mes: any = meses.find((mes: any) => mes.value === value);
-          return mes ? mes.label : null;
-        });
-
-
+        const labels: any = values.map((value: any) => value);
+        
         setDataBarras([
           {
-            name: "Total de emergencias de este mes",
+            name: "Total de emergencias por día",
             data: conteos.map((data: any) => data),
           }]
         )
@@ -298,12 +312,12 @@ const ReportsPage = () => {
             curve: 'straight'
           },
           title: {
-            text: 'Grafico linel de emergencias',
+            text: 'Gráfico de líneas de emergencias',
             align: 'left'
           },
           grid: {
             row: {
-              colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+              colors: ['#f3f3f3', 'transparent'],
               opacity: 0.5
             },
           },
@@ -322,43 +336,86 @@ const ReportsPage = () => {
         const values: any = Object.keys(response.data.data);
         const conteos: any = Object.values(response.data.data);
 
-
-        setDataPastel(conteos);
-        setHeatmapOptionsPie({
-          chart: {
-            width: '100%',
-            type: 'heatmap',
-            toolbar: {
-              show: true,
+    console.log(conteos);
+    const colores = [
+      '#FF5733', '#3366CC', '#66CC66', '#FFC300', '#FF9933',
+      '#9966CC', '#FF3399', '#00CC99', '#FF6600', '#0099CC',
+      '#FF9966', '#003366', '#CC9900', '#FF3300', '#339933',
+      '#FF6600', '#006699', '#FF0033', '#00CCFF', '#FFCC33',
+      // ... y así sucesivamente
+    ];
+      
+        setHeatmapOptionsPie( {
+            chart: {
+              type: 'bar',
+              height: 380
             },
-          },
-          labels: values,
-          theme: {
-            monochrome: {
-              enabled: true
-            }
-          },
-          plotOptions: {
-            pie: {
-              dataLabels: {
-                offset: -5
+            plotOptions: {
+              bar: {
+                barHeight: '100%',
+                distributed: true,
+                horizontal: true,
+                dataLabels: {
+                  position: 'bottom'
+                },
+              }
+            },
+            colors: [  '#FF5733', '#3366CC', '#66CC66', '#FFC300', '#FF9933',
+            '#9966CC', '#FF3399', '#00CC99', '#FF6600', '#0099CC',
+            '#FF9966', '#003366', '#CC9900', '#FF3300', '#339933',
+            '#FF6600', '#006699', '#FF0033', '#00CCFF', '#FFCC33'
+            ],
+            dataLabels: {
+              enabled: true,
+              textAnchor: 'start',
+              style: {
+                colors: ['#fff']
+              },
+              formatter: function (val, opt) {
+                return opt.w.globals.labels[opt.dataPointIndex] + ":  " + val
+              },
+              offsetX: 0,
+              dropShadow: {
+                enabled: true
+              }
+            },
+            stroke: {
+              width: 1,
+              colors: ['#fff']
+            },
+            xaxis: {
+              categories: values,
+            },
+            yaxis: {
+              labels: {
+                show: false
+              }
+            },
+            title: {
+                text: 'Custom DataLabels',
+                align: 'center',
+                floating: true
+            },
+            subtitle: {
+                text: 'Category Names as DataLabels inside bars',
+                align: 'center',
+            },
+            tooltip: {
+              theme: 'dark',
+              x: {
+                show: false
+              },
+              y: {
+                title: {
+                  formatter: function () {
+                    return ''
+                  }
+                }
               }
             }
-          },
-          title: {
-            text: "Diagrama de pastel de emergencias"
-          },
-          dataLabels: {
-            formatter(val: any, opts: any): any {
-              const name = opts.w.globals.labels[opts.seriesIndex]
-              return [/* name, */ val.toFixed(1) + '%']
-            }
-          },
-          legend: {
-            show: true
-          }
+          })
+          setDataPastel([{data:conteos}]);
         })
-      })
       .catch(error => { console.error(error); });
   };
   const randomColor = () => {
@@ -453,44 +510,44 @@ const ReportsPage = () => {
 
   const [heatmapData, sethHeatmapData] = useState([
     {
-      name: '1',
+      name: 'Lunes',
       data: [
         10, 2, 30, 40, 5, 60, 70
       ],
     },
     {
-      name: '2',
+      name: 'Martes',
       data: [
         0, 0, 0, 0, 0, 0, 10, 2, 30, 40, 5, 60, 70
       ],
     },
     {
-      name: '3',
+      name: 'Miércoles',
       data: [
         0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 30, 40, 5, 60, 70
       ],
     },
     {
-      name: '4',
+      name: 'Jueves',
       data:
         [0, 0, 0, 0, 0, 0, 10, 20, 0, 0, 0, 40, 50, 60, 70],
 
 
     },
     {
-      name: '5',
+      name: 'Viernes',
       data: [
         [0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
       ],
     },
     {
-      name: '6',
+      name: 'Sábado',
       data: [
         [10, 0, 0, 0, 0, 0, 0, 0, 0, 0,]
       ],
     },
     {
-      name: '7',
+      name: 'Domingo',
       data: [
         [0, 0, 0, 20, 30, 40, 0, 0, 0, 50, 60, 70],
       ],
@@ -513,7 +570,7 @@ const ReportsPage = () => {
               from: 1,
               to: 30,
               name: 'Bajo',
-              color: '#008FFB',
+              color: '#A1D7C9',
             },
             {
               from: 31,
@@ -541,50 +598,35 @@ const ReportsPage = () => {
       enabled: false,
     },
   });
-  const [heatmapOptionsPie, setHeatmapOptionsPie] = useState<ApexOptions>({
-    chart: {
-      width: '100%',
-      type: 'heatmap',
-      toolbar: {
-        show: true,
-      },
 
-    },
-    labels: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-    theme: {
-      monochrome: {
-        enabled: true
-      }
-    },
-    plotOptions: {
-      pie: {
-        dataLabels: {
-          offset: -5
-        }
-      }
-    },
-    title: {
-      text: "Diagrama de pastel de emergencias"
-    },
-    dataLabels: {
-      formatter(val: any, opts: any): any {
-        const name = opts.w.globals.labels[opts.seriesIndex]
-        return [/* name, */ val.toFixed(1) + '%']
-      }
-    },
-    legend: {
-      show: false
-    }
-  });
+
   const obtenerMapaCalor = (ciudad: any, barrio: any, titulo: any, fechaInicio: any, fechaFin: any, horaInicio: any, horaFin: any) => {
     axios.post('http://localhost:3000/api/reportes/obtenerMapaCalor', {  ciudad, barrio, titulo,fechaInicio, fechaFin, horaInicio, horaFin})
       .then(response => {
+       
+        
+        const tooltip:any = response.data.data.tooltip;
+      
+        const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        
         sethHeatmapData(response.data.data.heatmapData)
         setHeatmapOptions({
           chart: {
             type: 'heatmap',
             toolbar: {
               show: true,
+            },
+          },
+          tooltip:{
+            custom: function ({ seriesIndex, dataPointIndex }) {
+              const hora = dataPointIndex;
+              const emergencias = tooltip[seriesIndex].data[hora];
+              let tooltipContent = `<div class="custom-tooltip">`;
+              for (const [titulo, total] of Object.entries(emergencias)) {
+                tooltipContent += `<div>${titulo}: ${total}</div>`;
+              }
+              tooltipContent += `</div>`;
+              return tooltipContent;
             },
           },
           plotOptions: {
@@ -689,6 +731,27 @@ const ReportsPage = () => {
           console.error('Error al descargar el archivo:', error);
         });
     };
+    const verPDF = () => {
+      axios
+        .post('http://localhost:3000/api/reportes/descargarPDF', {  ciudad:selectedCiudad, 
+        barrio:selectedBarrio, titulo:selectedEmergencia,fechaInicio: selectedDateRange.startDate
+        , fechaFin:selectedDateRange.endDate, horaInicio:selectedHoraInicio.$d, horaFin:selectedHoraFin.$d}, {
+          responseType: 'arraybuffer', // Indicar que la respuesta es un ArrayBuffer
+        })
+        .then((response) => {
+          // Convertir la respuesta en un Blob
+          const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+    
+          // Crear una URL a partir del Blob
+          const url = window.URL.createObjectURL(pdfBlob);
+    
+          // Abrir una nueva ventana del navegador con la URL del PDF
+          window.open(url, '_blank');
+        })
+        .catch((error) => {
+          console.error('Error al mostrar la vista previa del PDF:', error);
+        });
+    };
 
     const descargarCSV = () => {
       axios
@@ -771,53 +834,40 @@ const ReportsPage = () => {
               <div className=" mx-auto px-32 ">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <ReporteCard
-                    titulo="Usuarios registrados"
-                    descripcion={
-                      <>
-                        Total de usuarios registrados
-                        <br /> <br /> <br />
-                      </>
-                    }                   
+                    titulo="Usuarios registros"
+                    descripcion="Total de usuarios registrados"
                     valor={usuariosRegistros}
                   />
                   <ReporteCard
                     titulo="Publicaciones registradas"
-                    descripcion={
-                      <>
-                        Total de publicaciones registradas
-                        <br /> <br /> 
-                      </>
-                    }                     valor={publicacionesRegistradas}
+                    descripcion="Total de publicaciones registradas"
+                    valor={publicacionesRegistradas}
                   />
                   <ReporteCard
-                    titulo="Publicaciones del mes"
+                    titulo="publicaciones del mes"
                     descripcion="Total de publicaciones hechas en este mes"
                     valor={publicacionesDelMes}
                   />
                   <ReporteCard
-                    titulo="Publicaciones del día"
+                    titulo="publicaciones del día"
                     descripcion="Total de publicaciones hechas el día de hoy"
                     valor={publicacionesDelDia}
                   />
                 </div>
               </div>
                <div className="flex mt-4 justify-center gap-6 no-print">
-              <button    onClick={descargarPDF} className="bg-red-500 text-white px-4 py-2 rounded-lg hover:scale-110 transition-all">
+              <button    onClick={verPDF} className="bg-red-500 text-white px-4 py-2 rounded-lg hover:scale-110 transition-all">
                 <span className="flex">
                 {printing ? 'Descargando...' : 'Descargar PDF Datos'} 
                   <DocumentArrowDownIcon className="h-5 w-5 ml-1 text-color-white" />
                 </span>
               </button>
-              
-              {/*
-               <button    onClick={handlePrint} className="bg-red-500 text-white px-4 py-2 rounded-lg hover:scale-110 transition-all">
+              <button    onClick={handlePrint} className="bg-red-500 text-white px-4 py-2 rounded-lg hover:scale-110 transition-all">
                 <span className="flex">
                 {printing ? 'Descargando...' : 'Descargar PDF Graficos'} 
                   <DocumentArrowDownIcon className="h-5 w-5 ml-1 text-color-white" />
                 </span>
               </button>
-              */}
-             
               <button  onClick={descargarCSV}  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:scale-110 transition-all">
                 <span className="flex">
                   Descargar CSV
@@ -870,9 +920,9 @@ const ReportsPage = () => {
                           <Chart options={optionsBarras} series={dataBarras} type="line" width="100%" />
                         </div>
                         <div className="w-full  p-4 no-page-break">
-                          <h1 className="text-center">Grafico de pastel</h1>
+                          <h1 className="text-center">Grafico de barras</h1>
                           {/*   <Pie data={dataPastel} /> */}
-                          <Chart options={heatmapOptionsPie} series={dataPastel} type="pie" width="100%" />
+                          <Chart options={heatmapOptionsPie} series={dataPastel} type="bar" width="100%" />
                         </div>
                       </div>
                     </div>
