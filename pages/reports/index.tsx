@@ -606,6 +606,7 @@ const ReportsPage = () => {
        
         
         const tooltip:any = response.data.data.tooltip;
+        const tooltiptime:any = response.data.data.tooltiptime;
       
         const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         
@@ -619,11 +620,20 @@ const ReportsPage = () => {
           },
           tooltip:{
             custom: function ({ seriesIndex, dataPointIndex }) {
+              let existenDatos = false;
               const hora = dataPointIndex;
               const emergencias = tooltip[seriesIndex].data[hora];
               let tooltipContent = `<div class="custom-tooltip">`;
               for (const [titulo, total] of Object.entries(emergencias)) {
+                existenDatos = true;
                 tooltipContent += `<div>${titulo}: ${total}</div>`;
+              }
+
+
+              if(existenDatos){
+              
+                  tooltipContent += `<div>${tooltiptime[seriesIndex].data[hora].fechaMinima} - ${tooltiptime[seriesIndex].data[hora].fechaMaxima}</div>`;
+              
               }
               tooltipContent += `</div>`;
               return tooltipContent;
